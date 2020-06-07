@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Level;
 
 public class Main4Activity extends AppCompatActivity {
 
@@ -34,6 +37,14 @@ public class Main4Activity extends AppCompatActivity {
      */
     private static final String FILENAME = "Main4Activity.java";
     private static final String TAG = "Whack-A-Mole3.0!";
+    public int score;
+    private Button b;
+    private Button bCheck;
+    private Button backButton;
+    private TextView scoresDisplay;
+    MyDBHandler dbHandler;
+    String levelSelected;
+    String username;
     CountDownTimer readyTimer;
     CountDownTimer newMolePlaceTimer;
 
@@ -47,6 +58,36 @@ public class Main4Activity extends AppCompatActivity {
             belongs here.
             This timer countdown from 10 seconds to 0 seconds and stops after "GO!" is shown.
          */
+
+        readyTimer = new CountDownTimer(10000,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                final Toast ToastMessage;
+                Log.v(TAG, "Countdown: " + millisUntilFinished/1000);
+                ToastMessage = Toast.makeText(getApplicationContext(),"Get Ready In " + millisUntilFinished/1000 + " seconds", Toast.LENGTH_SHORT);
+                ToastMessage.show();
+
+                Timer cancelToast = new Timer();
+                cancelToast.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        ToastMessage.cancel();
+                    }
+                }, 1000);
+
+            }
+
+            @Override
+            public void onFinish() {
+                Log.v(TAG, "Countdown stopped");
+                Toast.makeText(getApplicationContext(),"GO!", Toast.LENGTH_SHORT).show();
+                readyTimer.cancel();
+                placeMoleTimer();
+            }
+
+
+        };
+        readyTimer.start();
     }
     private void placeMoleTimer(){
         /* HINT:
@@ -56,11 +97,32 @@ public class Main4Activity extends AppCompatActivity {
            belongs here.
            This is an infinite countdown timer.
          */
+        int levelSpeed = (11 - Integer.parseInt(levelSelected)) * 1000;
+        newMolePlaceTimer = new CountDownTimer(levelSpeed, levelSpeed) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if (Integer.parseInt(levelSelected) > 5) {
+                    setTwoMoles();
+                }
+                else {
+                    setNewMole();
+                }
+            }
+
+            @Override
+            public void onFinish() {
+                newMolePlaceTimer.start();
+            }
+        };
+        newMolePlaceTimer.start();
     }
     private static final int[] BUTTON_IDS = {
             /* HINT:
                 Stores the 9 buttons IDs here for those who wishes to use array to create all 9 buttons.
                 You may use if you wish to change or remove to suit your codes.*/
+            R.id.button1, R.id.button2, R.id.button3, R.id.button4, R.id.button5,
+            R.id.button6, R.id.button7, R.id.button8, R.id.button9
+
     };
 
     @Override
@@ -75,6 +137,24 @@ public class Main4Activity extends AppCompatActivity {
             It also prepares the back button and updates the user score to the database
             if the back button is selected.
          */
+        scoresDisplay = findViewById(R.id.scoring);
+        backButton = (Button) findViewById(R.id.backBtn);
+        Intent receivingEnd = getIntent();
+        levelSelected = receivingEnd.getStringExtra("Level");
+        username = receivingEnd.getStringExtra("Username");
+
+        dbHandler = new MyDBHandler(this, "WhackAMole.db", null, 1);
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateUserScore();
+                Intent intentBack= new Intent(Main4Activity.this, Main3Activity.class);
+                intentBack.putExtra("Username", username);
+                startActivity(intentBack);
+            }
+        });
+
 
 
         for(final int id : BUTTON_IDS){
@@ -82,12 +162,40 @@ public class Main4Activity extends AppCompatActivity {
             This creates a for loop to populate all 9 buttons with listeners.
             You may use if you wish to remove or change to suit your codes.
             */
+            b = (Button) findViewById(id);
+            Log.v(TAG,"Populated!" + id);
+
+            b.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+
+                    bCheck = findViewById(view.getId());
+                    Log.v(TAG,"" + bCheck.getText().toString());
+                    doCheck(bCheck);
+                    newMolePlaceTimer.cancel();
+
+                    if (Integer.parseInt(levelSelected) > 5) {
+                        setTwoMoles();
+                    }
+                    else {
+                        setNewMole();
+                    }
+                    newMolePlaceTimer.start();
+                }
+            });
+
         }
     }
     @Override
     protected void onStart(){
         super.onStart();
         readyTimer();
+        if (Integer.parseInt(levelSelected) > 5) {
+            setTwoMoles();
+        }
+        else {
+            setNewMole();
+        }
     }
     private void doCheck(Button checkButton)
     {
@@ -97,7 +205,14 @@ public class Main4Activity extends AppCompatActivity {
             Log.v(TAG, FILENAME + ": Missed, point deducted!");
             belongs here.
         */
-
+        if(checkButton.getText().toString().equals("*")){
+            score += 1;
+            scoresDisplay.setText("" + score);
+        }
+        else{
+            score -= 1;
+            scoresDisplay.setText("" + score);
+        }
     }
 
     public void setNewMole()
@@ -108,7 +223,35 @@ public class Main4Activity extends AppCompatActivity {
          */
         Random ran = new Random();
         int randomLocation = ran.nextInt(9);
+        for(int i=0;i<BUTTON_IDS.length;i++){
+            b = (Button) findViewById(BUTTON_IDS[i]);
+            if(i != randomLocation){
+                b.setText("O");
+            }
+            else{
+                b.setText("*");
+            }
+        }
+    }
 
+    public void setTwoMoles(){
+        Random ran = new Random();
+        int randomLocation = ran.nextInt(9);
+        int randomLocation2 = ran.nextInt(9);
+        if(randomLocation == randomLocation2){
+            setTwoMoles();
+        }
+        else{
+            for(int i=0;i<BUTTON_IDS.length;i++){
+                b = (Button) findViewById(BUTTON_IDS[i]);
+                if(i != randomLocation || i != randomLocation2){
+                    b.setText("O");
+                }
+                else{
+                    b.setText("*");
+                }
+            }
+        }
     }
 
     private void updateUserScore()
@@ -120,6 +263,18 @@ public class Main4Activity extends AppCompatActivity {
       */
         newMolePlaceTimer.cancel();
         readyTimer.cancel();
+        UserData userData = dbHandler.findUser(username);
+        int currentLevel = userData.getLevels().get(Integer.parseInt(levelSelected) - 1);
+        int highScore = userData.getScores().get(currentLevel);
+        String currentScore = String.valueOf(score);
+        Log.v(TAG, FILENAME + ": Current score: " + currentScore);
+        if (score > highScore) {
+            Log.v(TAG, FILENAME + ": Update user score");
+            dbHandler.updateHighScore(username, Integer.parseInt(currentScore), Integer.parseInt(levelSelected));
+        } else {
+            Log.v(TAG, FILENAME + ": Did not beat high score");
+        }
+
     }
 
 }

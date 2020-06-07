@@ -4,4 +4,72 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Main2Activity"/>
+    tools:context=".Main2Activity">
+
+    <TextView
+        android:id="@+id/createUserTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="Create New User"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/createUserNameTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Username"
+        app:layout_constraintStart_toStartOf="@+id/createUserTextView"
+        app:layout_constraintTop_toBottomOf="@+id/createUserTextView" />
+
+    <EditText
+        android:id="@+id/createUserNameEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        app:layout_constraintStart_toStartOf="@+id/createUserNameTextView"
+        app:layout_constraintTop_toBottomOf="@+id/createUserNameTextView" />
+
+    <TextView
+        android:id="@+id/createPwTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Password"
+        app:layout_constraintStart_toStartOf="@+id/createUserNameEditText"
+        app:layout_constraintTop_toBottomOf="@+id/createUserNameEditText" />
+
+    <EditText
+        android:id="@+id/createPwEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:inputType="textPassword"
+        app:layout_constraintStart_toStartOf="@+id/createPwTextView"
+        app:layout_constraintTop_toBottomOf="@+id/createPwTextView" />
+
+    <Button
+        android:id="@+id/createCancelBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="Cancel"
+        app:layout_constraintStart_toStartOf="@+id/createPwEditText"
+        app:layout_constraintTop_toBottomOf="@+id/createPwEditText" />
+
+    <Button
+        android:id="@+id/createBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="Create"
+        app:layout_constraintEnd_toEndOf="@+id/createPwEditText"
+        app:layout_constraintTop_toBottomOf="@+id/createPwEditText" />
+</androidx.constraintlayout.widget.ConstraintLayout>
